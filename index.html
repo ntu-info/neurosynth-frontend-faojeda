@@ -2,44 +2,277 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Fetch /terms Demo</title>
+  <title>Neurosynth Frontend by 歐瑩忻</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Fetch https://mil.psy.ntu.edu.tw:5000/terms</h1>
-  <button id="btn">Fetch again</button>
-  <pre id="out">Loading…</pre>
+<body class="bg-gray-900 min-h-screen text-gray-100 font-sans relative overflow-x-hidden">
+  <!-- Original SVG wave background pattern in pinks and purples -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 z-0">
+    <svg width="100%" height="100%" viewBox="0 0 1440 900" preserveAspectRatio="none" style="position:absolute; left:0; top:0;" xmlns="http://www.w3.org/2000/svg">
+      <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a0025"/>
+        <stop offset="100%" stop-color="#a21caf"/>
+      </linearGradient>
+      <rect width="1440" height="900" fill="url(#waveGradient)"/>
+      <path d="M0 320 Q 720 400 1440 320 V900 H0Z" fill="#f472b6" opacity="0.18"/>
+      <path d="M0 400 Q 720 480 1440 400 V900 H0Z" fill="#db2777" opacity="0.13"/>
+      <path d="M0 480 Q 720 560 1440 480 V900 H0Z" fill="#f9a8d4" opacity="0.10"/>
+    </svg>
+  </div>
+  <div class="relative z-10 max-w-5xl mx-auto py-10 px-4">
+    <div class="flex justify-end mb-4">
+      <label for="serverSelect" class="mr-2 text-pink-200 font-medium">Server:</label>
+      <select id="serverSelect" class="bg-[#2a003a] text-pink-100 border border-pink-700 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-pink-400">
+        <option value="https://mil.psy.ntu.edu.tw:5000">Original</option>
+        <option value="https://hpc.psy.ntu.edu.tw:5000">Backup</option>
+      </select>
+    </div>
+    <div class="flex flex-col items-center mb-4">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Brain_Food_-_Idil_Keysan_-_Wikimedia_Giphy_stickers_2019.gif" alt="Animated brain" class="w-16 h-16 mb-2 rounded-full shadow-lg border-2 border-pink-400 bg-[#1a0025]" loading="lazy" />
+  <h1 class="text-2xl sm:text-3xl font-bold text-center text-pink-300">Neurosynth Frontend <span class="text-pink-400 text-base sm:text-lg font-normal">by 歐瑩忻</span></h1>
+    </div>
 
+  <!-- Section 1: All Terms -->
+  <section class="mb-8 bg-[#2a003a] rounded-2xl border border-pink-700 shadow p-5 sm:p-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-pink-200">All Terms</h2>
+    <button id="btnTerms" class="bg-pink-700 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded mb-4 text-sm sm:text-base">Search</button>
+  <pre id="outTerms" class="bg-[#2a003a] text-pink-200 rounded font-mono text-xs sm:text-sm p-3 sm:p-4 mt-2 min-h-[60px] border border-pink-900 max-h-72 overflow-y-auto"> </pre>
+    </section>
+
+    <!-- Section 2: Related Terms -->
+    <section class="mb-8 bg-[#2a003a] rounded-2xl border border-pink-700 shadow p-5 sm:p-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-pink-200">Related Terms</h2>
+    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+      <div class="relative w-full flex-1">
+        <input id="inRelated" type="text" placeholder="Enter term here" class="w-full pr-8 px-3 py-2 rounded bg-[#2a003a] text-pink-100 border border-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 placeholder-pink-300 text-sm sm:text-base" />
+        <button id="clearRelated" type="button" aria-label="Clear input" class="absolute right-2 top-1/2 -translate-y-1/2 text-pink-300 hover:text-pink-500 text-lg font-bold focus:outline-none hidden">&times;</button>
+      </div>
+    </div>
+  <pre id="outRelated" class="bg-[#2a003a] text-pink-200 rounded font-mono text-xs sm:text-sm p-3 sm:p-4 mt-2 min-h-[60px] border border-pink-900 max-h-72 overflow-y-auto"> </pre>
+    </section>
+
+  <!-- Section 3: Logical Search -->
+  <section class="bg-[#2a003a] rounded-2xl border border-pink-700 shadow p-5 sm:p-8">
+    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-pink-200">Logical Search</h2>
+    <div class="flex flex-col sm:flex-row gap-4 mb-4 items-stretch">
+      <div class="relative w-full flex-1">
+        <input id="inQuery" type="text" autocomplete="off" placeholder="Enter query here" class="w-full pr-8 px-3 py-2 rounded bg-[#2a003a] text-pink-100 border border-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 placeholder-pink-300 text-sm sm:text-base" />
+        <button id="clearQuery" type="button" aria-label="Clear input" class="absolute right-2 top-1/2 -translate-y-1/2 text-pink-300 hover:text-pink-500 text-lg font-bold focus:outline-none hidden">&times;</button>
+      </div>
+      <button id="btnExampleQuery" type="button" class="bg-pink-700 hover:bg-pink-600 text-white font-medium py-2 px-3 rounded text-xs sm:text-sm">Load example</button>
+    </div>
+  <pre id="outQuery" class="bg-[#2a003a] text-pink-200 rounded font-mono text-xs sm:text-sm p-3 sm:p-4 mt-2 min-h-[60px] border border-pink-900 max-h-72 overflow-y-auto"> </pre>
+    </section>
+  </div>
   <script>
-    async function fetchTerms() {
-      const out = document.getElementById('out');
-      out.textContent = 'Requesting…';
-      try {
-        const resp = await fetch('https://mil.psy.ntu.edu.tw:5000/terms');
-        let info = `HTTP ${resp.status} ${resp.statusText}\n`;
-        const ct = resp.headers.get('content-type') || '';
+  // Show/hide clear (×) button for inputs, and clear on click
+  function setupClearButton(inputId, buttonId, clearCallback) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(buttonId);
+    function toggleBtn() {
+      if (input.value) {
+        btn.classList.remove('hidden');
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+    input.addEventListener('input', toggleBtn);
+    btn.addEventListener('click', () => {
+      input.value = '';
+      input.dispatchEvent(new Event('input'));
+      if (clearCallback) clearCallback();
+      input.focus();
+    });
+    toggleBtn();
+  }
+  let API = document.getElementById('serverSelect').value;
+  // Setup clear buttons for both search bars
+  document.addEventListener('DOMContentLoaded', () => {
+    setupClearButton('inRelated', 'clearRelated', () => {
+      outRelated.innerHTML = '<pre>Type a term first.</pre>';
+    });
+    setupClearButton('inQuery', 'clearQuery', () => {
+      outQuery.innerHTML = '<pre>Type a query first.</pre>';
+      location.hash = '';
+    });
+  });
+  document.getElementById('serverSelect').addEventListener('change', function() {
+    API = this.value;
+  });
+    const btnTerms = document.getElementById('btnTerms');
+    const outTerms = document.getElementById('outTerms');
 
-        if (!resp.ok) {
-          const text = await resp.text();
-          out.textContent = info + '\n' + text;
-          return;
-        }
+  // const btnRelated = document.getElementById('btnRelated');
+    const inRelated = document.getElementById('inRelated');
+    const outRelated = document.getElementById('outRelated');
 
-        if (ct.includes('application/json')) {
-          const data = await resp.json();
-          out.textContent = info + '\n' + JSON.stringify(data, null, 2);
+
+
+    function pretty(data) {
+      return JSON.stringify(data, null, 2);
+    }
+
+    // Render array as HTML list, fallback to pretty JSON for objects
+    function renderList(data) {
+      if (Array.isArray(data)) {
+        if (data.length === 0) return '<em>No results</em>';
+        // If array of objects, show key summary, else show as list
+        if (typeof data[0] === 'object' && data[0] !== null) {
+          return '<ul class="list-disc pl-5 space-y-1">' + data.map(item =>
+            '<li>' + Object.entries(item).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join(', ') + '</li>'
+          ).join('') + '</ul>';
         } else {
-          const text = await resp.text();
-          out.textContent = info + '\n' + text;
+          return '<ul class="list-disc pl-5 space-y-1">' + data.map(item => `<li>${item}</li>`).join('') + '</ul>';
         }
-      } catch (err) {
-        document.getElementById('out').textContent =
-          'Error: ' + (err && err.message ? err.message : String(err)) +
-          '\n\nCommon causes:\n1) CORS not allowed by the server\n2) Opening this file via file:// instead of a local server\n3) Network/server issues';
+      } else {
+        return '<pre>' + pretty(data) + '</pre>';
       }
     }
 
-    document.getElementById('btn').addEventListener('click', fetchTerms);
-    fetchTerms();
+    function setLoading(el, isLoading) {
+      if (isLoading) {
+        el.textContent = 'Loading…';
+        el.classList.add('animate-pulse');
+      } else {
+        el.classList.remove('animate-pulse');
+      }
+    }
+
+    btnTerms.addEventListener('click', async () => {
+      setLoading(outTerms, true);
+      try {
+        const resp = await fetch(`${API}/terms`);
+        setLoading(outTerms, false);
+        if (!resp.ok) {
+          const text = await resp.text();
+          outTerms.innerHTML = `<pre>HTTP ${resp.status} ${resp.statusText}\n` + text + '</pre>';
+          return;
+        }
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await resp.json();
+          outTerms.innerHTML = renderList(data);
+        } else {
+          const text = await resp.text();
+          outTerms.innerHTML = '<pre>' + text + '</pre>';
+        }
+      } catch (err) {
+        setLoading(outTerms, false);
+        outTerms.innerHTML = '<pre>Error: ' + (err && err.message ? err.message : String(err)) + '</pre>';
+      }
+    });
+
+  // Removed btnRelated click event (button removed)
+
+    // Debounce helper
+    function debounce(fn, delay) {
+      let timer = null;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    async function fetchRelatedTerm() {
+      const term = inRelated.value.trim();
+      if (!term) {
+        setLoading(outRelated, false);
+        outRelated.innerHTML = '<pre>Type a term first.</pre>';
+        return;
+      }
+      setLoading(outRelated, true);
+      try {
+        const resp = await fetch(`${API}/terms/${encodeURIComponent(term)}`);
+        setLoading(outRelated, false);
+        if (!resp.ok) {
+          const text = await resp.text();
+          outRelated.innerHTML = `<pre>HTTP ${resp.status} ${resp.statusText}\n` + text + '</pre>';
+          return;
+        }
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await resp.json();
+          let terms = Array.isArray(data) ? data : (Array.isArray(data.terms) ? data.terms : data);
+          outRelated.innerHTML = renderList(terms);
+        } else {
+          const text = await resp.text();
+          outRelated.innerHTML = '<pre>' + text + '</pre>';
+        }
+      } catch (err) {
+        setLoading(outRelated, false);
+        outRelated.innerHTML = '<pre>Error: ' + (err && err.message ? err.message : String(err)) + '</pre>';
+      }
+    }
+
+    // Live AJAX: fetch as user types (debounced)
+    inRelated.addEventListener('input', debounce(fetchRelatedTerm, 400));
+
+  // const btnQuery = document.getElementById('btnQuery');
+    const inQuery = document.getElementById('inQuery');
+    const outQuery = document.getElementById('outQuery');
+    const btnExampleQuery = document.getElementById('btnExampleQuery');
+
+    async function runQuerySearch(updateHash = false) {
+      const q = inQuery.value.trim();
+      if (!q) {
+        setLoading(outQuery, false);
+        outQuery.innerHTML = '<pre>Type a query first.</pre>';
+        return;
+      }
+      if (updateHash) {
+        location.hash = `#q=${encodeURIComponent(q)}`;
+      }
+      setLoading(outQuery, true);
+      try {
+        const resp = await fetch(`${API}/query/${encodeURIComponent(q)}/studies`);
+        setLoading(outQuery, false);
+        if (!resp.ok) {
+          const text = await resp.text();
+          outQuery.innerHTML = `<pre>HTTP ${resp.status} ${resp.statusText}\n` + text + '</pre>';
+          return;
+        }
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await resp.json();
+          let studies = Array.isArray(data) ? data : (Array.isArray(data.studies) ? data.studies : data);
+          outQuery.innerHTML = renderList(studies);
+        } else {
+          const text = await resp.text();
+          outQuery.innerHTML = '<pre>' + text + '</pre>';
+        }
+      } catch (err) {
+        setLoading(outQuery, false);
+        outQuery.innerHTML = '<pre>Error: ' + (err && err.message ? err.message : String(err)) + '</pre>';
+      }
+    }
+
+
+  // Removed btnQuery click event (button removed)
+
+  // Live AJAX: fetch as user types (debounced)
+  inQuery.addEventListener('input', debounce(() => runQuerySearch(true), 500));
+
+    btnExampleQuery.addEventListener('click', () => {
+      inQuery.value = 'amygdala not emotion';
+      runQuerySearch(true);
+    });
+
+    // On page load, check hash for #q= and run search if present; otherwise, clear inQuery
+    window.addEventListener('DOMContentLoaded', () => {
+      if (location.hash.startsWith('#q=')) {
+        try {
+          const q = decodeURIComponent(location.hash.slice(3));
+          if (q) {
+            inQuery.value = q;
+            runQuerySearch();
+          }
+        } catch (e) {
+          // ignore malformed hash
+        }
+      } else {
+        inQuery.value = '';
+      }
+    });
   </script>
 </body>
 </html>
